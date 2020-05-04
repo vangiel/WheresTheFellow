@@ -16,7 +16,7 @@ import dgl
 import pickle
 import torch.nn.functional as F
 
-from calibration2 import CalibrationDataset, HumanGraph
+from graph_generator import CalibrationDataset, HumanGraph
 from nets.gat import GAT
 from nets.rgcnDGL import RGCN
 

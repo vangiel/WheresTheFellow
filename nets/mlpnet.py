@@ -204,8 +204,8 @@ class MLPNet(nn.Module):
             print('loading existing model...')
             self.load_state_dict(torch.load(self.model_file_name()))
             return
-        training_data = MLPNet.load_data('new_human_data_training.json')
-        test_data = MLPNet.load_data('merged_human_data_test_L.json')
+        training_data = MLPNet.load_data('./datasets/training_DS1.json')
+        test_data = MLPNet.load_data('./datasets/test.json')
         if self.train_2D:
             pickle.dump( training_data, open( 'training_data_2d.p', 'wb' ) )
             pickle.dump( test_data, open('test_data_2d.p', 'wb' ) )
@@ -262,9 +262,7 @@ class MLPNet(nn.Module):
 
 
     def run_tests(self):
-        test_datasets = [ 'merged_human_data_test_circle.json',
-                          'merged_human_data_test_square.json',
-                          'merged_human_data_test_triangle.json']
+        test_datasets = [ './datasets/test.json']
         for test_path in test_datasets:
             self.run_test(test_path)
 

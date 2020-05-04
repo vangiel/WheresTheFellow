@@ -4,14 +4,14 @@ import json, sys
 import math
 import copy
 
-import calibration2
+import graph_generator
 import trackerapi
 import math
 import pickle
 from sklearn.metrics import mean_squared_error
 
 params = pickle.load(open('calibration.prms', 'rb'), fix_imports=True)
-test_dataset = calibration2.CalibrationDataset(sys.argv[1], params['net'], '1')
+test_dataset = graph_generator.CalibrationDataset(sys.argv[1], params['net'], '1')
 
 
 

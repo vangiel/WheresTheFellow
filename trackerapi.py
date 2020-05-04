@@ -3,7 +3,7 @@ import dgl
 import torch
 import numpy as np
 import sys
-import calibration2
+import graph_generator
 import pickle
 import torch.nn.functional as F
 

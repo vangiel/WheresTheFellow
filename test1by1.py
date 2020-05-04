@@ -3,7 +3,7 @@ import json, sys
 import math
 import copy
 
-import calibration2
+import graph_generator
 import trackerapi
 import math
 from getkey import getkey, keys
@@ -44,7 +44,7 @@ while not stop:
     print("*************   PRESS q TO FINISH   **************")
     print("**************************************************")
 
-    test_dataset = calibration2.CalibrationDataset(data[i], 'run', '1')
+    test_dataset = graph_generator.CalibrationDataset(data[i], 'run', '1')
     results = model.predictOneGraph(test_dataset)[0]
 
     x_gt = data[i]['superbody'][0]['ground_truth'][0]

@@ -7,7 +7,7 @@ import numpy as np
 import matplotlib.pyplot as plt
 import json, sys
 import math
-import calibration2
+import graph_generator
 import trackerapi
 import math
 import pickle
@@ -85,7 +85,7 @@ class TestGUI(QMainWindow):
         sys.exit(r)
 
     def loadData(self, filename):
-        test_dataset = calibration2.CalibrationDataset(filename, 'run','1')
+        test_dataset = graph_generator.CalibrationDataset(filename, 'run','1')
         with open(sys.argv[1], 'r') as f:
             raw = f.read()
         raw = list(raw)

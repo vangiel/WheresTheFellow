@@ -4,14 +4,14 @@ import json, sys
 import math
 import copy
 
-import calibration2
+import graph_generator
 import trackerapi
 import math
 import pickle
 
 import torch
 from torch.utils.data import DataLoader
-from mlpnet import MLPNet
+from nets.mlpnet import MLPNet
 from sklearn.metrics import mean_squared_error
 
 def xxx_rads(a):
@@ -50,7 +50,7 @@ def to_error(got, ground_truth):
 
 
 def processData(filename):
-    test_dataset = calibration2.CalibrationDataset(filename, 'run','1')
+    test_dataset = graph_generator.CalibrationDataset(filename, 'run','1')
 
     with open(filename, 'r') as f:
         raw = f.read()
@@ -63,7 +63,7 @@ def processData(filename):
 
     model_gnn = trackerapi.TrackerAPI('.', test_dataset)
     results_gnn = [x for x in model_gnn.predict()]
-    train_2D = True # False->3D, True->2D
+    train_2D = False # False->3D, True->2D
     model_mlp = MLPNet(train_2D)
     if train_2D:
         test_data = MLPNet.load_data_2D(filename)

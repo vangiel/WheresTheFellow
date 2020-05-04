@@ -11,7 +11,7 @@ from torch_geometric.data import Data
 import torch.nn.functional as F
 import signal
 
-from calibration2 import CalibrationDataset, HumanGraph
+from graph_generator import CalibrationDataset, HumanGraph
 from nets.gat import GAT
 from nets.rgcnDGL import RGCN
 
@@ -292,9 +292,9 @@ def main(training_file, dev_file, test_file, epochs=None, patience=None, heads=N
 
 
 if __name__ == '__main__':
-    best_loss, test_loss = main('new_dataset/new_human_data_training.json',
-                    'merged_human_data_test_square_i_real.json',
-                    'merged_human_data_test_inf.json',
+    best_loss, test_loss = main('datasets/training_DS1.json',
+                    'datasets/dev.json',
+                    'datasets/test.json',
                      epochs=1000,
                      patience=15,
                      heads=[18, 17, 16],
