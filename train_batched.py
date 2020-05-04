@@ -334,9 +334,9 @@ if __name__ == '__main__':
 
         time_a = time.time()
         train_loss, dev_loss, test_loss, test_time, num_parameters, last_epoch, train_scores, dev_scores = main(
-            'new_dataset/new_human_data_training.json',
-            'merged_human_data_test_square_i_real.json',
-            'merged_human_data_test_inf.json',
+            'datasets/training_DS1.json',
+            'datasets/dev.json',
+            'datasets/test.json',
             task)
         time_b = time.time()
     
