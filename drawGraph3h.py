@@ -3,7 +3,7 @@ import json
 from PySide2 import QtWidgets, QtCore, QtGui
 from PySide2.QtCore import QRect
 import subprocess
-from calibration2 import HumanGraph
+from graph_generator import HumanGraph
 import math
 
 import ui_drawGraph
