@@ -41,8 +41,9 @@ class GAT(nn.Module):
     def forward(self, inputs):
         h = inputs
         for layer_number in range(len(self.layers)-1):
-            h = self.layers[layer_number](self.g, h).flatten(1)
-        return self.layers[-1](self.g, h).mean(1)
+            g_d = self.g.to(h.device)
+            h = self.layers[layer_number](g_d, h).flatten(1)
+        return self.layers[-1](g_d, h).mean(1)
 
 
 
