@@ -16,9 +16,9 @@ from nets.gat import GAT
 from nets.rgcnDGL import RGCN
 
 
-if torch.cuda.is_available() is True:
-    device = torch.device('cuda')
-else:
+# if torch.cuda.is_available() is True:
+#     device = torch.device('cuda')
+# else:
     device = torch.device('cpu')
 
 def activation_functions(activation_tuple_src):
