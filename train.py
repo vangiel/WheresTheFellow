@@ -171,7 +171,7 @@ def main(training_file, dev_file, test_file, epochs=None, patience=None, heads=N
                          activations=activation_functions(activations), feat_drop=in_drop)
             print(f'CREATING RGCN(GRAPH, gnn_layers:{num_layers}, num_feats:{num_feats}, num_hidden:{num_hidden}, num_rels:{num_rels}, non-linearity:{activation_functions(activations)}, drop:{in_drop})')
         elif net_class in [MPNN]: ### edge feature works
-            model = MPNN(num_feats, n_classes, num_hidden, num_edge_feats= 4, final_activation=None) ### edge feature works for setting number of edge features
+            model = MPNN(num_feats, n_classes, num_hidden, num_edge_feats=6, final_activation=None) ### edge feature works for setting number of edge features and mpnn parameter
             print(f'CREATING MPNN(GRAPH, num_feats:{num_feats}, edge_feats:{edge_feats})')
         else:
             print('Unhandled', net)

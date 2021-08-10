@@ -176,11 +176,11 @@ class HumanGraph(DGLGraph):
             camera_feature = HumanGraph.get_cam_types()[camera_number-1]
             self.features[max_used_id, all_features.index(camera_feature)] = 1.
             self.add_edge(0, max_used_id, {'rel_type': RelTensor([[HumanGraph.get_rels().index('sb2b')]]),
-                                    'norm': NormTensor([[1.]]), 'he': torch.Tensor([[0, 0, 0, 0]])}) ### add edge_feature tensor
+                                    'norm': NormTensor([[1.]]), 'he': torch.Tensor([[0, 0, 0, 0, 0, 0]])}) ### add edge_feature tensor
             if self.debug:
                 self.edges_debug[camera_number].append(tuple([0, max_used_id]))
             self.add_edge(max_used_id, 0, {'rel_type': RelTensor([[HumanGraph.get_rels().index('b2sb')]]),
-                                    'norm': NormTensor([[1.]]), 'he': torch.Tensor([[0, 0, 0, 0]])}) ### add edge_feature tensor
+                                    'norm': NormTensor([[1.]]), 'he': torch.Tensor([[0, 0, 0, 0, 0, 0]])}) ### add edge_feature tensor
             if self.debug:
                 self.edges_debug[camera_number].append(tuple([max_used_id, 0]))
 
@@ -260,11 +260,27 @@ class HumanGraph(DGLGraph):
                         edge_feature2_1 = 0 ### make system identifies exsiting value
                         edge_feature2_2 = 0
 
+                    ### create the third edge features data, score gap between two nodes
+
+                    value_node1_score = self.features[id_by_type[node_type1]][all_features.index('score')] ### catch score from features
+                    value_node2_score = self.features[id_by_type[node_type2]][all_features.index('score')]
+                    value_node_score_gap = abs(value_node2_score - value_node1_score) ### calculate score gap
+
+                    if value_node_score_gap != 0 and (node_type1 and node_type2 != 'b') and (
+                            value_node1_score and value_node2_score > 0.5): ### for avoiding node b and setting useful score for range over 0.5
+                        edge_feature3_1 = 1 ### make system identifies exsiting value
+                        edge_feature3_2 = value_node_score_gap
+                    else:
+                        edge_feature3_1 = 0 ### make system identifies exsiting value
+                        edge_feature3_2 = 0
+
                     ### import the edge features to tensor
                     self.add_edge(id_by_type[node_type1], id_by_type[node_type2],
                                   {'rel_type': RelTensor([[HumanGraph.get_rels().index(relation)]]),
                                    'norm': NormTensor([[1.]]),
-                                   'he': torch.Tensor([[edge_feature1_1, edge_feature1_2, edge_feature2_1, edge_feature2_2]])}) ### add edge_feature tensor from created data
+                                   'he': torch.Tensor([[edge_feature1_1, edge_feature1_2,
+                                                        edge_feature2_1, edge_feature2_2,
+                                                        edge_feature3_1, edge_feature3_2]])}) ### add edge_feature tensor from created data
                     if self.debug:
                         self.edges_debug[camera_number].append(tuple([id_by_type[node_type1], id_by_type[node_type2]]))
 
