@@ -27,6 +27,7 @@ class HumanGraph(DGLGraph):
         super(HumanGraph, self).__init__()
         self.labels = None
         self.features = None
+        self.e_features = None  ### egde_features works
         self.num_rels = -1
         self.mode = mode
         self.debug = debug
@@ -175,11 +176,11 @@ class HumanGraph(DGLGraph):
             camera_feature = HumanGraph.get_cam_types()[camera_number-1]
             self.features[max_used_id, all_features.index(camera_feature)] = 1.
             self.add_edge(0, max_used_id, {'rel_type': RelTensor([[HumanGraph.get_rels().index('sb2b')]]),
-                                    'norm': NormTensor([[1.]])})
+                                    'norm': NormTensor([[1.]]), 'he': torch.Tensor([[0]])}) ### add edge_feature tensor
             if self.debug:
                 self.edges_debug[camera_number].append(tuple([0, max_used_id]))
             self.add_edge(max_used_id, 0, {'rel_type': RelTensor([[HumanGraph.get_rels().index('b2sb')]]),
-                                    'norm': NormTensor([[1.]])})
+                                    'norm': NormTensor([[1.]]), 'he': torch.Tensor([[0]])}) ### add edge_feature tensor
             if self.debug:
                 self.edges_debug[camera_number].append(tuple([max_used_id, 0]))
 
@@ -215,9 +216,27 @@ class HumanGraph(DGLGraph):
                 node_type1 = split[0]
                 node_type2 = split[1]
                 if (node_type1 in id_by_type) and (node_type2 in id_by_type):
+
+                    value_xposition1 = self.features[id_by_type[node_type1]][all_features.index('x_position')]
+                    value_xposition2 = self.features[id_by_type[node_type2]][all_features.index('x_position')]
+                    value_xposition_square = np.square(value_xposition2 - value_xposition1) ### square the x position for computing distance
+
+                    value_yposition1 = self.features[id_by_type[node_type1]][all_features.index('y_position')]
+                    value_yposition2 = self.features[id_by_type[node_type2]][all_features.index('y_position')]
+                    value_yposition_square = np.square(value_yposition2 - value_yposition1) ### square the y position for computing distance
+
+                    value_zposition1 = self.features[id_by_type[node_type1]][all_features.index('z_position')]
+                    value_zposition2 = self.features[id_by_type[node_type2]][all_features.index('z_position')]
+                    value_zposition_square = np.square(value_zposition2 - value_zposition1) ### square the z position for computing distance
+
+                    value_node_distance = np.sqrt(value_xposition_square + value_yposition_square + value_zposition_square) ### for computing distance
+
+                    edge_feature1 = value_node_distance ### importing distance to edge_feature1
+
                     self.add_edge(id_by_type[node_type1], id_by_type[node_type2],
                                   {'rel_type': RelTensor([[HumanGraph.get_rels().index(relation)]]),
-                                   'norm': NormTensor([[1.]])})
+                                   'norm': NormTensor([[1.]]),
+                                   'he': torch.Tensor([[edge_feature1]])}) ### add edge_feature tensor from created data
                     if self.debug:
                         self.edges_debug[camera_number].append(tuple([id_by_type[node_type1], id_by_type[node_type2]]))
 
@@ -226,6 +245,7 @@ class HumanGraph(DGLGraph):
                 if counter == 1:
                     self.type_map_debug[camera_number][0] = 'sb'
 
+        self.e_features = self.edata['he']  ### import edge_feature to e_features
 
 
 # ############________________________________________________________________________________________############## #
@@ -284,6 +304,7 @@ class CalibrationDataset(object):
         self.graph = dgl.batch(self.data)
         self.features = torch.from_numpy(np.concatenate([element.features for element in self.data]))
         self.labels = torch.from_numpy(np.concatenate([element.labels for element in self.data]))
+        self.e_features = torch.from_numpy(np.concatenate([element.e_features for element in self.data])) ### for edge_features work
         if self.mode is not 'run':
             self.save_to_file()
 
@@ -300,6 +321,7 @@ class CalibrationDataset(object):
         self.graph = dgl.batch(self.data)
         self.features = torch.from_numpy(np.concatenate([element.features for element in self.data]))
         self.labels = torch.from_numpy(np.concatenate([element.labels for element in self.data]))
+        self.e_features = torch.from_numpy(np.concatenate([element.e_features for element in self.data]))  ### for edge_features work
 
     def save_to_file(self):
         filename = self.get_dataset_name()
