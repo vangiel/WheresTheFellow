@@ -14,6 +14,7 @@ import signal
 from graph_generator import CalibrationDataset, HumanGraph
 from nets.gat import GAT
 from nets.rgcnDGL import RGCN
+from nets.mpnn_dgl import MPNN ### new module
 
 
 if torch.cuda.is_available() is True:
@@ -61,6 +62,8 @@ def evaluate(feats, model, subgraph, labels, loss_fcn, fw, net_class):
                 layer.g = subgraph
             if net_class in [RGCN]:
                 output = model(feats.float(), subgraph.edata['rel_type'].to(device).squeeze())
+            elif net_class in [MPNN]:
+                output = model(subgraph, feats.float(), subgraph.edata['he'].to(device)) ### for new module MPNN
             else:
                 output = model(feats.float())
         oput = output[getMaskForBatch(subgraph)]
@@ -108,6 +111,8 @@ def main(training_file, dev_file, test_file, epochs=None, patience=None, heads=N
         net_class = GAT
     elif net.lower() == 'RGCN'.lower():
         net_class = RGCN
+    elif net.lower() == 'MPNN'.lower(): ### for new module MPNN
+        net_class = MPNN
 
     print('DEVICE', device)
 
@@ -148,6 +153,8 @@ def main(training_file, dev_file, test_file, epochs=None, patience=None, heads=N
     print('Number of classes:  {}'.format(n_classes))
     num_feats = train_dataset.features.shape[1]
     print('Number of features: {}'.format(num_feats))
+    edge_feats = train_dataset.e_features.shape[1]  ### edge features works
+    print('Number of e_features: {}'.format(edge_feats)) ### edge features works
     g = train_dataset.graph
     # define the model
 
@@ -163,6 +170,9 @@ def main(training_file, dev_file, test_file, epochs=None, patience=None, heads=N
             model = RGCN(g, gnn_layers=num_layers, in_dim=num_feats, hidden_dimensions=num_hidden, num_rels=num_rels,
                          activations=activation_functions(activations), feat_drop=in_drop)
             print(f'CREATING RGCN(GRAPH, gnn_layers:{num_layers}, num_feats:{num_feats}, num_hidden:{num_hidden}, num_rels:{num_rels}, non-linearity:{activation_functions(activations)}, drop:{in_drop})')
+        elif net_class in [MPNN]: ### edge feature works
+            model = MPNN(num_feats, n_classes, num_hidden, num_edge_feats=1, final_activation=None) ### edge feature works
+            print(f'CREATING MPNN(GRAPH, num_feats:{num_feats}, edge_feats:{edge_feats})')
         else:
             print('Unhandled', net)
             sys.exit(1)
@@ -194,6 +204,8 @@ def main(training_file, dev_file, test_file, epochs=None, patience=None, heads=N
                     layer.g = subgraph
                 if net_class in [RGCN]:
                     logits = model(feats.float(), subgraph.edata['rel_type'].squeeze().to(device))
+                elif net_class in [MPNN]:
+                    logits = model(subgraph, feats.float(), subgraph.edata['he'].to(device)) ### for MPNN works
                 else:
                     logits = model(feats.float())
             loss = loss_fcn(logits[getMaskForBatch(subgraph)], labels.float())
@@ -308,7 +320,7 @@ if __name__ == '__main__':
                      alpha=0.12,
                      batch_size=10,
                      graph_type='1',
-                     net='gat',
+                     net='mpnn', ### test for MPNN
                      activations=['relu', 'relu', 'tanh'],
                      fw='dgl')
 
