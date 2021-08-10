@@ -176,11 +176,11 @@ class HumanGraph(DGLGraph):
             camera_feature = HumanGraph.get_cam_types()[camera_number-1]
             self.features[max_used_id, all_features.index(camera_feature)] = 1.
             self.add_edge(0, max_used_id, {'rel_type': RelTensor([[HumanGraph.get_rels().index('sb2b')]]),
-                                    'norm': NormTensor([[1.]]), 'he': torch.Tensor([[0]])}) ### add edge_feature tensor
+                                    'norm': NormTensor([[1.]]), 'he': torch.Tensor([[0, 0]])}) ### add edge_feature tensor
             if self.debug:
                 self.edges_debug[camera_number].append(tuple([0, max_used_id]))
             self.add_edge(max_used_id, 0, {'rel_type': RelTensor([[HumanGraph.get_rels().index('b2sb')]]),
-                                    'norm': NormTensor([[1.]]), 'he': torch.Tensor([[0]])}) ### add edge_feature tensor
+                                    'norm': NormTensor([[1.]]), 'he': torch.Tensor([[0, 0]])}) ### add edge_feature tensor
             if self.debug:
                 self.edges_debug[camera_number].append(tuple([max_used_id, 0]))
 
@@ -217,6 +217,7 @@ class HumanGraph(DGLGraph):
                 node_type2 = split[1]
                 if (node_type1 in id_by_type) and (node_type2 in id_by_type):
 
+                    ### create the first edge features data
                     value_xposition1 = self.features[id_by_type[node_type1]][all_features.index('x_position')]
                     value_xposition2 = self.features[id_by_type[node_type2]][all_features.index('x_position')]
                     value_xposition_square = np.square(value_xposition2 - value_xposition1) ### square the x position for computing distance
@@ -231,12 +232,18 @@ class HumanGraph(DGLGraph):
 
                     value_node_distance = np.sqrt(value_xposition_square + value_yposition_square + value_zposition_square) ### for computing distance
 
-                    edge_feature1 = value_node_distance ### importing distance to edge_feature1
+                    if value_node_distance != 0:
+                        edge_feature1_1 = 1
+                        edge_feature1_2 = value_node_distance
+                    else:
+                        edge_feature1_1 = 0
+                        edge_feature1_2 = 0
 
+                    ### import the edge features to tensor
                     self.add_edge(id_by_type[node_type1], id_by_type[node_type2],
                                   {'rel_type': RelTensor([[HumanGraph.get_rels().index(relation)]]),
                                    'norm': NormTensor([[1.]]),
-                                   'he': torch.Tensor([[edge_feature1]])}) ### add edge_feature tensor from created data
+                                   'he': torch.Tensor([[edge_feature1_1, edge_feature1_2]])}) ### add edge_feature tensor from created data
                     if self.debug:
                         self.edges_debug[camera_number].append(tuple([id_by_type[node_type1], id_by_type[node_type2]]))
 
@@ -245,7 +252,7 @@ class HumanGraph(DGLGraph):
                 if counter == 1:
                     self.type_map_debug[camera_number][0] = 'sb'
 
-        self.e_features = self.edata['he']  ### import edge_feature to e_features
+        self.e_features = self.edata['he']  ### import edge_feature tensor to e_features
 
 
 # ############________________________________________________________________________________________############## #
