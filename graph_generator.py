@@ -12,7 +12,7 @@ import random
 from dgl import DGLGraph
 #from mergedgraph import MergedDGLGraph, unmerge
 
-limit = 300
+limit = 500
 allowed_delta = 250
 path_saves = 'saves/'
 
