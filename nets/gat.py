@@ -42,8 +42,8 @@ class GAT(nn.Module):
         h = inputs
         g = self.g.to(h.device)
         for layer_number in range(len(self.layers)-1):
-            h = self.layers[layer_number](self.g, h).flatten(1)
-        return self.layers[-1](self.g, h).mean(1)
+            h = self.layers[layer_number](g, h).flatten(1)
+        return self.layers[-1](g, h).mean(1)
 
 
 
