@@ -232,11 +232,11 @@ class HumanGraph(DGLGraph):
 
                     value_node_distance = np.sqrt(value_xposition_square + value_yposition_square + value_zposition_square) ### for computing distance
 
-                    if value_node_distance != 0:
-                        edge_feature1_1 = 1
+                    if value_node_distance != 0 and node_type1 != 'b' and node_type2 != 'b':  ### due to node b is always 0, we make the code to avoid it
+                        edge_feature1_1 = 1  ### make system identifies exsiting value
                         edge_feature1_2 = value_node_distance
                     else:
-                        edge_feature1_1 = 0
+                        edge_feature1_1 = 0  ### make system identifies exsiting value
                         edge_feature1_2 = 0
 
                     ### import the edge features to tensor
