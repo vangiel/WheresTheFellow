@@ -270,8 +270,7 @@ class HumanGraph(DGLGraph):
                     value_node2_score = self.features[id_by_type[node_type2]][all_features.index('score')]
                     value_node_score_gap = abs(value_node2_score - value_node1_score) ### calculate score gap
 
-                    if value_node_score_gap != 0 and (node_type1 and node_type2 != 'b') and (
-                            value_node1_score and value_node2_score > 0.5): ### for avoiding node b and setting useful score for range over 0.5
+                    if value_node_score_gap != 0 and value_node1_score > 0.7 and value_node2_score > 0.7: ### for avoiding node b and setting useful score for range over 0.7
                         edge_feature3_1 = value_exist
                         edge_feature3_2 = value_node_score_gap
                     else:
