@@ -217,6 +217,10 @@ class HumanGraph(DGLGraph):
                 node_type2 = split[1]
                 if (node_type1 in id_by_type) and (node_type2 in id_by_type):
 
+                    ### ideentify the exist value
+                    value_exist = 1
+                    value_unexist = 0
+
                     ### create the first edge features data, distance between two nodes
                     value_xposition1 = self.features[id_by_type[node_type1]][all_features.index('x_position')]
                     value_xposition2 = self.features[id_by_type[node_type2]][all_features.index('x_position')]
@@ -233,10 +237,10 @@ class HumanGraph(DGLGraph):
                     value_node_distance = np.sqrt(value_xposition_square + value_yposition_square + value_zposition_square) ### for computing distance
 
                     if value_node_distance != 0 and node_type1 != 'b' and node_type2 != 'b':  ### due to node b is always 0, we make the code to avoid it
-                        edge_feature1_1 = 1  ### make system identifies exsiting value
+                        edge_feature1_1 = value_exist
                         edge_feature1_2 = value_node_distance
                     else:
-                        edge_feature1_1 = 0  ### make system identifies exsiting value
+                        edge_feature1_1 = value_unexist
                         edge_feature1_2 = 0
 
                     ### create the second edge features data, torque between two nodes
@@ -254,10 +258,10 @@ class HumanGraph(DGLGraph):
                     value_coordinate_torque = abs(value_node1_coordinate) * abs(value_node2_coordinate) * value_node1_sin ### torque formula |r|.|F|.|sin|
 
                     if value_coordinate_torque != 0 and node_type1 != 'b' and node_type2 != 'b':
-                        edge_feature2_1 = 1 ### make system identifies exsiting value
+                        edge_feature2_1 = value_exist
                         edge_feature2_2 = value_coordinate_torque
                     else:
-                        edge_feature2_1 = 0 ### make system identifies exsiting value
+                        edge_feature2_1 = value_unexist
                         edge_feature2_2 = 0
 
                     ### create the third edge features data, score gap between two nodes
@@ -268,10 +272,10 @@ class HumanGraph(DGLGraph):
 
                     if value_node_score_gap != 0 and (node_type1 and node_type2 != 'b') and (
                             value_node1_score and value_node2_score > 0.5): ### for avoiding node b and setting useful score for range over 0.5
-                        edge_feature3_1 = 1 ### make system identifies exsiting value
+                        edge_feature3_1 = value_exist
                         edge_feature3_2 = value_node_score_gap
                     else:
-                        edge_feature3_1 = 0 ### make system identifies exsiting value
+                        edge_feature3_1 = value_unexist
                         edge_feature3_2 = 0
 
                     ### import the edge features to tensor
