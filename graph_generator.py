@@ -71,7 +71,8 @@ class HumanGraph(DGLGraph):
 
     @staticmethod
     def get_all_features():
-        return HumanGraph.get_node_types_one_hot() + HumanGraph.get_cam_types() + HumanGraph.get_joint_metric_features() #+ HumanGraph.get_body_metric_features()
+        return HumanGraph.get_node_types_one_hot() + HumanGraph.get_cam_types() + HumanGraph.get_joint_metric_features() \
+               + HumanGraph.get_body_metric_features() ### extend the on hot for adding timestamp for edge features
 
     @staticmethod
     def get_joint_metric_features():
@@ -82,7 +83,7 @@ class HumanGraph(DGLGraph):
 
     @staticmethod
     def get_body_metric_features():
-        return ['x', 'y', 'z', 'orientation_sin', 'orientation_cos'] #, 'timestamp']
+        return ['x', 'y', 'z', 'orientation_sin', 'orientation_cos', 'timestamp'] ### adding the timestamp for edge features
 
     @staticmethod
     def get_rels():
@@ -150,7 +151,7 @@ class HumanGraph(DGLGraph):
         self.labels[0][body_metric_features.index('z')] = data['superbody'][0]['ground_truth'][2]/4000.
         self.labels[0][body_metric_features.index('orientation_sin')] = 0.7*math.sin(data['superbody'][0]['ground_truth'][3])
         self.labels[0][body_metric_features.index('orientation_cos')] = 0.7*math.cos(data['superbody'][0]['ground_truth'][3])
-#        self.labels[0][body_metric_features.index('timestamp')] = 0.
+        self.labels[0][body_metric_features.index('timestamp')] = data['superbody'][0]['timestamp']/pow(10, 13) ### value of the timestamp for edge features
 
         self.features[0, all_features.index('superbody')] = 1.
         max_used_id = 1  # 0 for the superbody (global node)
@@ -176,11 +177,11 @@ class HumanGraph(DGLGraph):
             camera_feature = HumanGraph.get_cam_types()[camera_number-1]
             self.features[max_used_id, all_features.index(camera_feature)] = 1.
             self.add_edge(0, max_used_id, {'rel_type': RelTensor([[HumanGraph.get_rels().index('sb2b')]]),
-                                    'norm': NormTensor([[1.]]), 'he': torch.Tensor([[0, 0, 0, 0, 0, 0, 0, 0]])}) ### add edge_feature tensor
+                                    'norm': NormTensor([[1.]]), 'he': torch.Tensor([[0, 0, 0, 0, 0, 0, 0, 0, 0, 0]])}) ### add edge_feature tensor
             if self.debug:
                 self.edges_debug[camera_number].append(tuple([0, max_used_id]))
             self.add_edge(max_used_id, 0, {'rel_type': RelTensor([[HumanGraph.get_rels().index('b2sb')]]),
-                                    'norm': NormTensor([[1.]]), 'he': torch.Tensor([[0, 0, 0, 0, 0, 0, 0, 0]])}) ### add edge_feature tensor
+                                    'norm': NormTensor([[1.]]), 'he': torch.Tensor([[0, 0, 0, 0, 0, 0, 0, 0, 0, 0]])}) ### add edge_feature tensor
             if self.debug:
                 self.edges_debug[camera_number].append(tuple([max_used_id, 0]))
 
@@ -289,6 +290,16 @@ class HumanGraph(DGLGraph):
                         edge_feature4_1 = value_exist
                         edge_feature4_2 = 1
 
+                    ### create the fifth edge features data, edge's timestamp
+
+                    value_timestamp = self.labels[0][body_metric_features.index('timestamp')]
+                    if value_timestamp > 1: ### all valu_timestamp are less 0, this is for in case
+                        edge_feature5_1 = value_unexist
+                        edge_feature5_2 = 0
+                    else:
+                        edge_feature5_1 = value_exist
+                        edge_feature5_2 = self.labels[0][body_metric_features.index('timestamp')]
+
                     ### import the edge features to tensor
 
                     self.add_edge(id_by_type[node_type1], id_by_type[node_type2],
@@ -297,7 +308,8 @@ class HumanGraph(DGLGraph):
                                    'he': torch.Tensor([[edge_feature1_1, edge_feature1_2,
                                                         edge_feature2_1, edge_feature2_2,
                                                         edge_feature3_1, edge_feature3_2,
-                                                        edge_feature4_1, edge_feature4_2]])}) ### add edge_feature tensor from created data
+                                                        edge_feature4_1, edge_feature4_2,
+                                                        edge_feature5_1, edge_feature5_2]])}) ### add edge_feature tensor from created data
                     if self.debug:
                         self.edges_debug[camera_number].append(tuple([id_by_type[node_type1], id_by_type[node_type2]]))
 
