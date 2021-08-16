@@ -176,11 +176,11 @@ class HumanGraph(DGLGraph):
             camera_feature = HumanGraph.get_cam_types()[camera_number-1]
             self.features[max_used_id, all_features.index(camera_feature)] = 1.
             self.add_edge(0, max_used_id, {'rel_type': RelTensor([[HumanGraph.get_rels().index('sb2b')]]),
-                                    'norm': NormTensor([[1.]]), 'he': torch.Tensor([[0, 0, 0, 0, 0, 0]])}) ### add edge_feature tensor
+                                    'norm': NormTensor([[1.]]), 'he': torch.Tensor([[0, 0, 0, 0, 0, 0, 0, 0]])}) ### add edge_feature tensor
             if self.debug:
                 self.edges_debug[camera_number].append(tuple([0, max_used_id]))
             self.add_edge(max_used_id, 0, {'rel_type': RelTensor([[HumanGraph.get_rels().index('b2sb')]]),
-                                    'norm': NormTensor([[1.]]), 'he': torch.Tensor([[0, 0, 0, 0, 0, 0]])}) ### add edge_feature tensor
+                                    'norm': NormTensor([[1.]]), 'he': torch.Tensor([[0, 0, 0, 0, 0, 0, 0, 0]])}) ### add edge_feature tensor
             if self.debug:
                 self.edges_debug[camera_number].append(tuple([max_used_id, 0]))
 
@@ -277,13 +277,27 @@ class HumanGraph(DGLGraph):
                         edge_feature3_1 = value_unexist
                         edge_feature3_2 = 0
 
+                    ### create the fourth edge features data, relation with main torso
+
+                    if ('rel' in node_type1) or ('lel' in node_type1):
+                        edge_feature4_1 = value_unexist
+                        edge_feature4_2 = 0
+                    elif ('lel' in node_type2) or ('rel' in node_type2):
+                        edge_feature4_1 = value_unexist
+                        edge_feature4_2 = 0
+                    else:
+                        edge_feature4_1 = value_exist
+                        edge_feature4_2 = 1
+
                     ### import the edge features to tensor
+
                     self.add_edge(id_by_type[node_type1], id_by_type[node_type2],
                                   {'rel_type': RelTensor([[HumanGraph.get_rels().index(relation)]]),
                                    'norm': NormTensor([[1.]]),
                                    'he': torch.Tensor([[edge_feature1_1, edge_feature1_2,
                                                         edge_feature2_1, edge_feature2_2,
-                                                        edge_feature3_1, edge_feature3_2]])}) ### add edge_feature tensor from created data
+                                                        edge_feature3_1, edge_feature3_2,
+                                                        edge_feature4_1, edge_feature4_2]])}) ### add edge_feature tensor from created data
                     if self.debug:
                         self.edges_debug[camera_number].append(tuple([id_by_type[node_type1], id_by_type[node_type2]]))
 
