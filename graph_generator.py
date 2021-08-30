@@ -71,8 +71,7 @@ class HumanGraph(DGLGraph):
 
     @staticmethod
     def get_all_features():
-        return HumanGraph.get_node_types_one_hot() + HumanGraph.get_cam_types() + HumanGraph.get_joint_metric_features() \
-               + HumanGraph.get_body_metric_features() ### extend the on hot for adding timestamp for edge features
+        return HumanGraph.get_node_types_one_hot() + HumanGraph.get_cam_types() + HumanGraph.get_joint_metric_features() #+ HumanGraph.get_body_metric_features() ### extend the on hot for adding timestamp for edge features
 
     @staticmethod
     def get_joint_metric_features():
@@ -83,7 +82,7 @@ class HumanGraph(DGLGraph):
 
     @staticmethod
     def get_body_metric_features():
-        return ['x', 'y', 'z', 'orientation_sin', 'orientation_cos', 'timestamp'] ### adding the timestamp for edge features
+        return ['x', 'y', 'z', 'orientation_sin', 'orientation_cos'] #, 'timestamp'] ### adding the timestamp for edge features
 
     @staticmethod
     def get_rels():
@@ -151,7 +150,7 @@ class HumanGraph(DGLGraph):
         self.labels[0][body_metric_features.index('z')] = data['superbody'][0]['ground_truth'][2]/4000.
         self.labels[0][body_metric_features.index('orientation_sin')] = 0.7*math.sin(data['superbody'][0]['ground_truth'][3])
         self.labels[0][body_metric_features.index('orientation_cos')] = 0.7*math.cos(data['superbody'][0]['ground_truth'][3])
-        self.labels[0][body_metric_features.index('timestamp')] = data['superbody'][0]['timestamp']/pow(10, 13) ### value of the timestamp for edge features
+        # self.labels[0][body_metric_features.index('timestamp')] = data['superbody'][0]['timestamp']/pow(10, 13) ### value of the timestamp for edge features
 
         self.features[0, all_features.index('superbody')] = 1.
         max_used_id = 1  # 0 for the superbody (global node)
@@ -164,6 +163,18 @@ class HumanGraph(DGLGraph):
             counter = 0
         for cam in data['superbody']:
             camera_number = cam['cameraId']
+            timestamp_value = cam['timestamp']  ### import timestamp from superbody
+
+            counter_for_timestamp = 0 ### caculation for counter amount of timestamp in each superbody
+            amount_of_timestamp = 0 ### total number of timestamp
+
+            for tim_v in data['superbody']: ### for collecting
+                temporary_cal = tim_v['timestamp']
+                counter_for_timestamp += 1
+                amount_of_timestamp = amount_of_timestamp + temporary_cal
+
+            timestamps_average = amount_of_timestamp / counter_for_timestamp  ### average timestamps
+
             typeMap = dict()
             id_by_type.clear()
             if self.debug:
@@ -292,13 +303,16 @@ class HumanGraph(DGLGraph):
 
                     ### create the fifth edge features data, edge's timestamp
 
-                    value_timestamp = self.labels[0][body_metric_features.index('timestamp')]
-                    if value_timestamp > 1: ### all valu_timestamp are less 0, this is for in case
+                    timestamp_gap_limt = 0.001
+                    timestamp_compared = timestamp_value
+                    timestamp_gap = abs(timestamps_average - timestamp_compared) / pow(10, 2)
+
+                    if timestamp_gap < timestamp_gap_limt:
                         edge_feature5_1 = value_unexist
                         edge_feature5_2 = 0
                     else:
                         edge_feature5_1 = value_exist
-                        edge_feature5_2 = self.labels[0][body_metric_features.index('timestamp')]
+                        edge_feature5_2 = timestamp_gap
 
                     ### import the edge features to tensor
 
