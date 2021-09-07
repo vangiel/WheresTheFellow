@@ -233,7 +233,7 @@ class HumanGraph(DGLGraph):
                     value_exist = 1
                     value_unexist = 0
 
-                    ### create the first edge features data, distance between two nodes
+                    ## create the first edge features data, distance between two nodes
                     value_xposition1 = self.features[id_by_type[node_type1]][all_features.index('x_position')]
                     value_xposition2 = self.features[id_by_type[node_type2]][all_features.index('x_position')]
                     value_xposition_square = np.square(value_xposition2 - value_xposition1) ### square the x position for computing distance
@@ -259,15 +259,21 @@ class HumanGraph(DGLGraph):
 
                     value_icoordinate_node1 = self.features[id_by_type[node_type1]][all_features.index('i_coordinate')]
                     value_jcoordinate_node1 = self.features[id_by_type[node_type1]][all_features.index('j_coordinate')]
-                    value_node1_coordinate = np.sqrt(np.square(value_icoordinate_node1) + np.square(value_jcoordinate_node1)) ### node1 vector long
+                    # value_node1_coordinate = np.sqrt(np.square(value_icoordinate_node1) + np.square(value_jcoordinate_node1)) ### node1 vector long
 
                     value_icoordinate_node2 = self.features[id_by_type[node_type2]][all_features.index('i_coordinate')]
                     value_jcoordinate_node2 = self.features[id_by_type[node_type2]][all_features.index('j_coordinate')]
-                    value_node2_coordinate = np.sqrt(np.square(value_icoordinate_node2) + np.square(value_jcoordinate_node2)) ### node2 vector long
+                    # value_node2_coordinate = np.sqrt(np.square(value_icoordinate_node2) + np.square(value_jcoordinate_node2)) ### node2 vector long
 
-                    value_node1_sin = value_jcoordinate_node1 / value_node1_coordinate ### node1 sin
+                    value_icoordinate_gap = abs(value_icoordinate_node2 - value_icoordinate_node1)### for setting the 0 coordination on node 1
+                    value_jcoordinate_gap = abs(value_jcoordinate_node2 - value_jcoordinate_node1)
 
-                    value_coordinate_torque = abs(value_node1_coordinate) * abs(value_node2_coordinate) * value_node1_sin ### torque formula |r|.|F|.|sin|
+                    value_gap_distance = np.sqrt(np.square(value_icoordinate_gap) + np.square(value_jcoordinate_gap))
+
+                    # value_node1_sin = value_jcoordinate_node1 / value_node1_coordinate ### node1 sin
+                    # value_coordinate_torque = abs(value_node1_coordinate) * abs(value_node2_coordinate) * value_node1_sin ### torque formula |r|.|F|.|sin|
+
+                    value_coordinate_torque = abs(value_node_distance) * abs(value_jcoordinate_gap) ### torque formula |r|.|F|.|sin|
 
                     if value_coordinate_torque != 0 and node_type1 != 'b' and node_type2 != 'b':
                         edge_feature2_1 = value_exist
