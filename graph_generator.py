@@ -273,7 +273,9 @@ class HumanGraph(DGLGraph):
                     # value_node1_sin = value_jcoordinate_node1 / value_node1_coordinate ### node1 sin
                     # value_coordinate_torque = abs(value_node1_coordinate) * abs(value_node2_coordinate) * value_node1_sin ### torque formula |r|.|F|.|sin|
 
-                    value_coordinate_torque = abs(value_node_distance) * abs(value_jcoordinate_gap) ### torque formula |r|.|F|.|sin|
+                    value_coordinate_torque = abs(value_node_distance) * abs(value_jcoordinate_gap) ### torque formula |r|.|F|.|sin|,
+                                                                                                    ### abs(value_node_distance)*abs(value_gap_distance) * abs(value_jcoordinate_gap)/ abs(value_gap_distance)
+                                                                                                    ### because of value_gap_distance has divided by itself, it can be omitted
 
                     if value_coordinate_torque != 0 and node_type1 != 'b' and node_type2 != 'b':
                         edge_feature2_1 = value_exist
